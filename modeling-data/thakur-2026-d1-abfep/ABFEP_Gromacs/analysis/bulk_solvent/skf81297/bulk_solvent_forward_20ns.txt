@@ -1,0 +1,2 @@
+# Time(ps) Forward(kcal/mol) +- Error
+20000.0   145.491 +- 0.208

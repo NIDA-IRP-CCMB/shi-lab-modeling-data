@@ -1,0 +1,104 @@
+;====================================================
+; Production simulation in NVT
+;====================================================
+
+;----------------------------------------------------
+; RUN CONTROL
+;----------------------------------------------------
+define        = -DPOSRES -DPOSRES_FC_LIG=0 -DPOSRES_FC_BB_gp=1000.0 -DPOSRES_FC_BB=0.0 -DPOSRES_FC_SC_gp=0.0 -DPOSRES_FC_SC=0.0 -DPOSRES_FC_LIPID=0.0 -DDIHRES -DDIHRES_FC=0.0
+integrator   = sd            ; stochastic leap-frog integrator
+nsteps       = 3000000      ; 3,000,000 steps * 2 fs = 6,000 ps = 6 ns
+dt           = 0.002         ; 2 fs
+comm-mode    = Linear        ; remove center of mass translation
+nstcomm      = 10000         ; frequency for center of mass motion removal
+
+;----------------------------------------------------
+; OUTPUT CONTROL
+;----------------------------------------------------
+nstxout                = 0          ; don't save coordinates to .trr
+nstvout                = 0          ; don't save velocities to .trr
+nstfout                = 0          ; don't save forces to .trr
+nstxout-compressed     = 500000      ; xtc compressed trajectory output every 50000 steps (250 ps)
+compressed-x-precision = 10000      ; precision with which to write to the compressed trajectory file
+nstlog                 = 10000      ; update log file every 2 ps
+nstenergy              = 10000      ; save energies every 2 ps
+nstcalcenergy          = 100        ; calculate energies every 100 steps
+
+;----------------------------------------------------
+; BONDS
+;----------------------------------------------------
+constraint_algorithm   = lincs      ; holonomic constraints
+constraints            = h-bonds    ; hydrogens only are constrained
+lincs_iter             = 1         ; accuracy of LINCS (1 is default)
+lincs_order            = 4          ; also related to accuracy (4 is default)
+lincs-warnangle        = 30         ; maximum angle that a bond can rotate before LINCS will complain (30 is default)
+continuation           = no        ; useful for exact continuations and reruns
+
+
+;----------------------------------------------------
+; VELOCITY GENERATION
+;----------------------------------------------------
+gen_vel      = yes      ; Velocity generation is on (if gen_vel is 'yes', continuation should be 'no')
+gen_seed     = -1      ; Use random seed
+gen_temp     = 310
+
+
+;----------------------------------------------------
+; NEIGHBOR SEARCHING
+;----------------------------------------------------
+cutoff-scheme   = Verlet
+ns-type         = grid     ; search neighboring grid cells
+nstlist         = 25       ; 20 fs (default is 10)
+rlist           = 1.2      ; short-range neighborlist cutoff (in nm)
+pbc             = xyz      ; 3D PBC
+
+;----------------------------------------------------
+; ELECTROSTATICS
+;----------------------------------------------------
+coulombtype      = PME      ; Particle Mesh Ewald for long-range electrostatics
+rcoulomb         = 1.0      ; short-range electrostatic cutoff (in nm)
+ewald_geometry   = 3d       ; Ewald sum is performed in all three dimensions
+pme-order        = 5        ; interpolation order for PME (default is 4)
+fourierspacing   = 0.1     ; grid spacing for FFT
+ewald-rtol       = 1e-6     ; relative strength of the Ewald-shifted direct potential at rcoulomb
+
+;----------------------------------------------------
+; VDW
+;----------------------------------------------------
+rvdw            = 1.0
+DispCorr        = Ener
+
+
+;----------------------------------------------------
+; TEMPERATURE & PRESSURE COUPL
+;----------------------------------------------------
+tcoupl           = nose-hoover
+tc_grps          = SOLU MEMB SOLV
+tau_t            = 1.0 1.0 1.0
+ref_t            = 310 310 310
+pcoupl           = Parrinello-Rahman
+pcoupltype       = semiisotropic
+tau_p            = 2
+compressibility  = 4.5e-5  4.5e-5
+ref_p            = 0     1.0
+refcoord-scaling = all
+
+;----------------------------------------------------
+; FREE ENERGY CALCULATIONS
+;----------------------------------------------------
+free-energy              = yes
+couple-moltype           = LIG
+couple-lambda0           = vdw-q
+couple-lambda1           = none
+couple-intramol          = yes
+separate-dhdl-file       = yes
+sc-alpha                 = 0.5
+sc-power                 = 1
+sc-sigma                 = 0.3
+init-lambda-state        = 0
+bonded-lambdas           = 0.000 0.300 0.600 0.800 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000
+coul-lambdas             = 0.000 0.000 0.000 0.000 0.000 0.035 0.070 0.105 0.140 0.175 0.210 0.245 0.280 0.315 0.350 0.385 0.420 0.455 0.490 0.525 0.560 0.595 0.630 0.665 0.700 0.735 0.770 0.805 0.840 0.875 0.910 0.945 0.980 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000
+vdw-lambdas              = 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.030 0.060 0.100 0.140 0.180 0.220 0.260 0.300 0.340 0.380 0.420 0.460 0.500 0.540 0.580 0.620 0.660 0.690 0.720 0.750 0.780 0.810 0.840 0.870 0.900 0.930 0.960 0.975 0.990 1.000
+nstdhdl                  = 100
+calc-lambda-neighbors    = -1
+

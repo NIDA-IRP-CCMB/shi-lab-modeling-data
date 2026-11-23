@@ -1,0 +1,3 @@
+dG_off =   -8.768 kcal/mol
+dG_on  =    8.768 kcal/mol
+Updated restrain.py with: {'T': 310.0, 'r0': 0.547, 'thA': 101.6, 'thB': 63.9, 'K_r': 418.4, 'K_thA': 209.2, 'K_thB': 209.2, 'K_phiA': 209.2, 'K_phiB': 209.2, 'K_phiC': 209.2}
